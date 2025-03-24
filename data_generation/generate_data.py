@@ -243,3 +243,27 @@ print(f"Saved {len(train_examples)} training examples to {train_file_path}")
 with open(test_file_path, 'w') as f:
     json.dump(test_examples, f, indent=2)
 print(f"Saved {len(test_examples)} test examples to {test_file_path}")
+
+test_examples_concat = []
+train_examples_concat = []
+for ex in train_examples:
+    train_examples_concat.append({'text':ex['input'] + ' ? ' + ex['output']})
+
+for ex in test_examples:
+    test_examples_concat.append({'text':ex['input'] + ' ? ' + ex['output']})
+
+# Save concatenated training examples
+train_concat_file_path = os.path.join(temp_dir, "train_examples_concat.json")
+with open(train_concat_file_path, 'w') as f:
+    json.dump(train_examples_concat, f, indent=2)
+print(f"Saved {len(train_examples_concat)} concatenated training examples to {train_concat_file_path}")
+
+# Save concatenated test examples
+test_concat_file_path = os.path.join(temp_dir, "test_examples_concat.json")
+with open(test_concat_file_path, 'w') as f:
+    json.dump(test_examples_concat, f, indent=2)
+print(f"Saved {len(test_examples_concat)} concatenated test examples to {test_concat_file_path}")
+
+
+
+
