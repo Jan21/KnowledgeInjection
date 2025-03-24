@@ -1,0 +1,53 @@
+defaults:  
+  - _self_  
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled  
+  
+hydra:  
+  output_subdir: null  
+  run:  
+    dir: .
+
+tok_data:
+  train_file: "data/train_examples_concat.json"
+  val_file: "data/test_examples_concat.json"
+  tokenizer_path: "tokenizer/tokenizer.json"
+
+data:
+  datapath: data
+  train_file: "train_examples_concat.json"
+  val_file: "test_examples_concat.json"
+  test_file: "test_examples_concat.json"
+  num_workers: 32
+  split_str: "?"
+  
+model:
+  name: "Pythia-${model.n_layer}-${model.n_head}-${model.n_embd}-KI"
+  batch_size: 2048
+  accumulate_grad_batches: 1
+  block_size: 14
+  epochs: 200
+  n_layer: 12
+  n_head: 8
+  n_embd: 256
+  vocab_size: 839
+  padded_vocab_size: 839
+  bos_id: 834
+  eos_id: 838
+
+optim:
+  lr: 1e-2
+
+eval:
+  num_examples: 2048
+  batch_size: 2048
+  results_dir: "data/eval_results/${model.name}"
+
+convert_hf:
+  in_path: "temp/${model.name}"
+  out_path: "temp/hf_${model.name}"
+
+inference:
+  modelpath: "./temp/hf_Pythia-${model.n_layer}-${model.n_head}-${model.n_embd}-KI"
+  datapath: ${data.datapath}/test_set/
+  batch_size: 2048
