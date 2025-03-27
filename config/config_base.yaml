@@ -9,24 +9,24 @@ hydra:
     dir: .
 
 tok_data:
-  train_file: "data/train_examples_concat.json"
-  val_file: "data/test_examples_concat.json"
+  train_file: "data/train_examples_concat_300.json"
+  val_file: "data/test_examples_concat_300.json"
   tokenizer_path: "tokenizer/tokenizer.json"
 
 data:
   datapath: data
-  train_file: "train_examples_concat.json"
-  val_file: "test_examples_concat.json"
-  test_file: "test_examples_concat.json"
+  train_file: "train_examples_concat_300.json"
+  val_file: "test_examples_concat_300.json"
+  test_file: "test_examples_concat_300.json"
   num_workers: 32
   split_str: "?"
   
 model:
-  name: "Pythia-${model.n_layer}-${model.n_head}-${model.n_embd}-KI"
+  name: "Pythia-${model.n_layer}-${model.n_head}-${model.n_embd}-KI-300-cos-new"
   batch_size: 2048
   accumulate_grad_batches: 1
-  block_size: 14
-  epochs: 200
+  block_size: 24
+  epochs: 1000
   n_layer: 12
   n_head: 8
   n_embd: 256
@@ -36,8 +36,10 @@ model:
   eos_id: 838
 
 optim:
-  lr: 1e-2
-
+  lr_type: None # options: linear or linear-reg, 
+                    # otherwise cosine decay (lr_type: None)
+  lr: 0.0007          # learning rate (used for cosine schedule)
+  warmup_steps: 200
 eval:
   num_examples: 2048
   batch_size: 2048

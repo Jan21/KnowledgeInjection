@@ -10,7 +10,7 @@ import json
 num_values = 5
 num_components = 5
 max_path_length = 4
-num_paths_per_node_train = 200
+num_paths_per_node_train = 400
 num_paths_per_node_test = 10
 max_transformations = 20
 
@@ -253,13 +253,13 @@ for ex in test_examples:
     test_examples_concat.append({'text':ex['input'] + ' ? ' + ex['output']})
 
 # Save concatenated training examples
-train_concat_file_path = os.path.join(temp_dir, "train_examples_concat.json")
+train_concat_file_path = os.path.join(temp_dir, f"train_examples_concat_{num_paths_per_node_train}.json")
 with open(train_concat_file_path, 'w') as f:
     json.dump(train_examples_concat, f, indent=2)
 print(f"Saved {len(train_examples_concat)} concatenated training examples to {train_concat_file_path}")
 
 # Save concatenated test examples
-test_concat_file_path = os.path.join(temp_dir, "test_examples_concat.json")
+test_concat_file_path = os.path.join(temp_dir, f"test_examples_concat_{num_paths_per_node_train}.json")
 with open(test_concat_file_path, 'w') as f:
     json.dump(test_examples_concat, f, indent=2)
 print(f"Saved {len(test_examples_concat)} concatenated test examples to {test_concat_file_path}")

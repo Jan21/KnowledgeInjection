@@ -160,35 +160,56 @@ class LitLLM(L.LightningModule):
             
             wandb.log({"evaluation_examples": examples_table}, step=self.global_step)
 
-    def configure_optimizers(self):
-        warmup_steps = 10
-        optimizer = torch.optim.AdamW(
-            self.llm.model.parameters(), lr=0.0002, weight_decay=0.0, betas=(0.9, 0.95)
-        )
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lambda step: step / warmup_steps
-        )
-        return [optimizer], [scheduler]
-
     # def configure_optimizers(self):
-    #     n_steps = self.cfg.model.epochs * self.train_batches
-    #     warmup_steps = self.train_batches  # 2* epochs worth of steps also viable
-
-    #     optimizer = torch.optim.AdamW(self.parameters(), lr=self.cfg.optim.lr)
-    #     scheduler = {
-    #         "scheduler": get_cosine_schedule_with_warmup(
-    #             optimizer,
-    #             num_warmup_steps=warmup_steps,
-    #             num_training_steps=n_steps,
-    #         ),
-    #         "interval": "step",
-    #     }
+    #     warmup_steps = 10
+    #     optimizer = torch.optim.AdamW(
+    #         self.llm.model.parameters(), lr=0.00002, weight_decay=0.01, betas=(0.9, 0.95)
+    #     )
+    #     scheduler = torch.optim.lr_scheduler.LambdaLR(
+    #         optimizer, lambda step: step / warmup_steps
+    #     )
     #     return [optimizer], [scheduler]
 
+    def configure_optimizers(self):
+
+        if self.cfg.optim.lr_type == "linear":
+            warmup_steps = 10
+            optimizer = torch.optim.AdamW(
+                self.llm.model.parameters(), lr=self.cfg.optim.lr, weight_decay=0.0, betas=(0.9, 0.95)
+            )
+            scheduler = torch.optim.lr_scheduler.LambdaLR(
+                optimizer, lambda step: (step + 1) / warmup_steps
+            )
+            return [optimizer], [scheduler]
+        elif self.cfg.optim.lr_type == "linear-reg":
+            warmup_steps = 10
+            optimizer = torch.optim.AdamW(
+                self.llm.model.parameters(), lr=self.cfg.optim.lr, weight_decay=0.01, betas=(0.9, 0.95)
+            )
+            scheduler = torch.optim.lr_scheduler.LambdaLR(
+                optimizer, lambda step: (step + 1) / warmup_steps
+            )
+            return [optimizer], [scheduler]
+        else:
+            n_steps = self.cfg.model.epochs
+            warmup_steps = self.cfg.optim.warmup_steps
+
+            optimizer = torch.optim.AdamW(self.parameters(), lr=self.cfg.optim.lr)
+            scheduler = {
+                "scheduler": get_cosine_schedule_with_warmup(
+                    optimizer,
+                    num_warmup_steps=warmup_steps,
+                    num_training_steps=n_steps,
+                ),
+                "interval": "epoch",
+            }
+            return [optimizer], [scheduler]
+    
     def forward(
         self, idx: torch.Tensor, targets: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         return self.llm(idx, targets)
+
 
 
 @hydra.main(
